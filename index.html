@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0b1020" />
+<title>Challenging Flappy Bird</title>
+<meta name="description" content="Flappy Bird dengan musuh, power-up, boss, biome, dan vanity shop. HTML5 Canvas + Vanilla JS." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🐤</text></svg>" />
+<link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="game" width="480" height="720" aria-label="Game canvas"></canvas>
+
+    <!-- ===================== IN-GAME HUD ===================== -->
+    <div id="hud" class="hud hidden" aria-hidden="true">
+      <div class="hud-top">
+        <div class="hud-left">
+          <div id="hud-score" class="hud-score">0</div>
+          <div id="hud-combo" class="hud-combo hidden">
+            <span id="hud-combo-label">COMBO x1</span>
+            <div class="combo-bar"><i id="hud-combo-fill"></i></div>
+          </div>
+        </div>
+        <div class="hud-right">
+          <div class="hud-chip"><span class="ic">🪙</span><span id="hud-coins">0</span></div>
+          <div class="hud-chip"><span class="ic">🪶</span><span id="hud-ammo">3</span></div>
+          <button id="btn-pause" class="icon-btn" title="Pause (P)" aria-label="Pause">⏸</button>
+        </div>
+      </div>
+      <div id="hud-biome" class="hud-biome">Fajar</div>
+      <div id="hud-buffs" class="hud-buffs"></div>
+      <div id="hud-dash" class="hud-dash">
+        <span class="dash-label">DASH</span>
+        <div class="dash-bar"><i id="hud-dash-fill"></i></div>
+      </div>
+    </div>
+
+    <!-- ===================== TOUCH CONTROLS ===================== -->
+    <div id="touch-controls" class="touch-controls hidden" aria-hidden="true">
+      <button id="btn-shoot" class="touch-btn" aria-label="Tembak">🪶</button>
+      <button id="btn-dash" class="touch-btn" aria-label="Dash">💨</button>
+    </div>
+
+    <!-- ===================== MAIN MENU ===================== -->
+    <section id="screen-menu" class="screen">
+      <div class="panel panel-menu">
+        <h1 class="logo">
+          <span class="logo-line1">CHALLENGING</span>
+          <span class="logo-line2">FLAPPY <span class="accent">BIRD</span></span>
+        </h1>
+        <div class="menu-stats">
+          <div class="stat"><small>HIGH SCORE</small><b id="menu-highscore">0</b></div>
+          <div class="stat"><small>KOIN</small><b id="menu-coins">0</b><span class="coin-ic">🪙</span></div>
+          <div class="stat"><small>RUN</small><b id="menu-runs">0</b></div>
+        </div>
+
+        <div class="diff-picker" role="group" aria-label="Tingkat kesulitan">
+          <button class="diff" data-diff="chill">😌 Chill</button>
+          <button class="diff" data-diff="classic">🐦 Classic</button>
+          <button class="diff" data-diff="nightmare">💀 Nightmare</button>
+        </div>
+        <p id="diff-desc" class="diff-desc">&nbsp;</p>
+
+        <div class="menu-buttons">
+          <button id="btn-start" class="btn btn-primary">▶ MULAI</button>
+          <div class="btn-row">
+            <button id="btn-shop" class="btn">🛍️ Shop</button>
+            <button id="btn-missions" class="btn">🎯 Misi<span id="missions-badge" class="badge hidden">!</span></button>
+          </div>
+          <div class="btn-row">
+            <button id="btn-howto" class="btn btn-ghost">❔ Cara Main</button>
+            <button id="btn-settings" class="btn btn-ghost">⚙️ Opsi</button>
+          </div>
+        </div>
+        <p class="hint">Space / Klik untuk terbang &middot; <b>F</b> tembak &middot; <b>Shift</b> dash</p>
+      </div>
+    </section>
+
+    <!-- ===================== SHOP ===================== -->
+    <section id="screen-shop" class="screen hidden">
+      <div class="panel panel-wide">
+        <header class="panel-head">
+          <h2>🛍️ Vanity Shop</h2>
+          <div class="wallet"><span class="coin-ic">🪙</span><b id="shop-coins">0</b></div>
+        </header>
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="skins" role="tab">Skin</button>
+          <button class="tab" data-tab="upgrades" role="tab">Trinket</button>
+        </div>
+        <div id="shop-skins" class="shop-grid scroller"></div>
+        <div id="shop-upgrades" class="shop-list scroller hidden"></div>
+        <p id="shop-msg" class="shop-msg">&nbsp;</p>
+        <button id="btn-shop-back" class="btn btn-primary wide">← Kembali</button>
+      </div>
+    </section>
+
+    <!-- ===================== MISSIONS ===================== -->
+    <section id="screen-missions" class="screen hidden">
+      <div class="panel panel-wide">
+        <header class="panel-head">
+          <h2>🎯 Misi Harian</h2>
+          <div class="wallet"><span class="coin-ic">🪙</span><b id="missions-coins">0</b></div>
+        </header>
+        <p class="sub">Reset setiap hari. Selesaikan untuk koin bonus.</p>
+        <div id="missions-list" class="shop-list scroller"></div>
+        <button id="btn-missions-back" class="btn btn-primary wide">← Kembali</button>
+      </div>
+    </section>
+
+    <!-- ===================== HOW TO PLAY ===================== -->
+    <section id="screen-howto" class="screen hidden">
+      <div class="panel panel-wide">
+        <header class="panel-head"><h2>❔ Cara Main</h2></header>
+        <div class="scroller howto">
+          <h3>Kontrol</h3>
+          <ul class="keys">
+            <li><kbd>Space</kbd> / <kbd>Klik</kbd> / <kbd>Tap</kbd> — Flap (terbang)</li>
+            <li><kbd>F</kbd> / <kbd>J</kbd> / <kbd>Klik kanan</kbd> — Tembak bulu 🪶 (amunisi terbatas, mengisi otomatis)</li>
+            <li><kbd>Shift</kbd> / <kbd>D</kbd> — Dash 💨 (kebal sesaat, menghancurkan musuh yang ditabrak)</li>
+            <li><kbd>P</kbd> / <kbd>Esc</kbd> — Pause</li>
+          </ul>
+          <h3>Sistem</h3>
+          <ul class="keys">
+            <li><b>Combo</b> — setiap pipa, koin, dan musuh menambah combo. Diam terlalu lama, combo habis. Multiplier sampai x5.</li>
+            <li><b>Close Call</b> — lewat mepet celah pipa memberi skor bonus. Berani = untung.</li>
+            <li><b>Biome</b> — tiap 20 skor dunia berubah: Senja (pipa bergerak), Malam (gelap), Badai (angin), Void (gravitasi rendah).</li>
+            <li><b>Boss</b> — muncul di skor 50, lalu tiap 75. Hanya bisa dibunuh dengan tembakan bulu. Drop koin besar.</li>
+            <li><b>Power-up</b> — ⭐ Double Score, 🛡️ Immunity, 🧲 Coin Magnet. Aktif 8 detik.</li>
+          </ul>
+          <h3>Ekonomi</h3>
+          <ul class="keys">
+            <li>1 pipa = 1 koin. 🪙 koin = 1, 💎 permata = 5.</li>
+            <li>Koin dipakai di Shop untuk skin (vanity) dan trinket (upgrade kecil).</li>
+          </ul>
+        </div>
+        <button id="btn-howto-back" class="btn btn-primary wide">← Kembali</button>
+      </div>
+    </section>
+
+    <!-- ===================== SETTINGS ===================== -->
+    <section id="screen-settings" class="screen hidden">
+      <div class="panel">
+        <header class="panel-head"><h2>⚙️ Opsi</h2></header>
+        <div class="settings">
+          <label class="switch"><input type="checkbox" id="set-sfx" checked /><span>Efek Suara</span></label>
+          <label class="switch"><input type="checkbox" id="set-music" checked /><span>Musik</span></label>
+          <label class="switch"><input type="checkbox" id="set-shake" checked /><span>Screen Shake</span></label>
+          <label class="switch"><input type="checkbox" id="set-flash" checked /><span>Kilat / Flash</span></label>
+          <label class="switch"><input type="checkbox" id="set-touch" /><span>Paksa Tombol Sentuh</span></label>
+        </div>
+        <button id="btn-reset" class="btn btn-danger wide">🗑️ Reset Progress</button>
+        <button id="btn-settings-back" class="btn btn-primary wide">← Kembali</button>
+      </div>
+    </section>
+
+    <!-- ===================== PAUSE ===================== -->
+    <section id="screen-pause" class="screen hidden">
+      <div class="panel panel-sm">
+        <h2 class="center">⏸ PAUSE</h2>
+        <button id="btn-resume" class="btn btn-primary wide">▶ Lanjut</button>
+        <button id="btn-quit" class="btn btn-ghost wide">🏠 Menu Utama</button>
+      </div>
+    </section>
+
+    <!-- ===================== GAME OVER ===================== -->
+    <section id="screen-over" class="screen hidden">
+      <div class="panel panel-sm">
+        <h2 class="center over-title">GAME OVER</h2>
+        <div id="over-newbest" class="newbest hidden">✨ NEW HIGH SCORE ✨</div>
+        <div class="over-grid">
+          <div class="stat"><small>SKOR</small><b id="over-score">0</b></div>
+          <div class="stat"><small>BEST</small><b id="over-best">0</b></div>
+          <div class="stat"><small>KOIN</small><b id="over-coins">0</b><span class="coin-ic">🪙</span></div>
+        </div>
+        <ul id="over-details" class="over-details"></ul>
+        <button id="btn-restart" class="btn btn-primary wide">↻ MAIN LAGI</button>
+        <div class="btn-row">
+          <button id="btn-over-shop" class="btn">🛍️ Shop</button>
+          <button id="btn-over-menu" class="btn btn-ghost">🏠 Menu</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  <p class="credit">dibuat dengan HTML5 Canvas + Vanilla JS &middot; tanpa satu pun file gambar 🎨</p>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
