@@ -41,6 +41,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+        # coba aktifkan Pages otomatis; kalau token tidak punya izin,
+        # aktifkan manual sekali di Settings -> Pages -> Source: GitHub Actions
+        with:
+          enablement: true
       - name: Upload artifact (situs statis = root repo)
         uses: actions/upload-pages-artifact@v3
         with:
