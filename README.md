@@ -79,13 +79,19 @@ python3 -m http.server 8000
 ```
 
 ### Deploy ke GitHub Pages
-Sudah ada workflow di `.github/workflows/pages.yml` yang men-deploy root repo
-otomatis setiap push ke `main`. Cukup aktifkan sekali:
 
-**Settings → Pages → Source: GitHub Actions**
+Workflow `.github/workflows/pages.yml` menjalankan smoke test lalu men-deploy
+root repo setiap push ke `main`. **Butuh satu langkah manual sekali saja:**
 
-Setelah itu game hidup di `https://<username>.github.io/ChallengingFlappyBird/`.
-(Deploy manual juga bisa: Pages → *Deploy from a branch* → `main` / `root`.)
+> **Settings → Pages → Source: `GitHub Actions`**
+
+Sebelum langkah itu dilakukan, job *Deploy* akan gagal dengan
+`Create Pages site failed: Resource not accessible by integration` — itu normal,
+karena `GITHUB_TOKEN` tidak berhak membuat situs Pages sendiri. Setelah Pages
+diaktifkan, jalankan ulang workflow (tab **Actions** → *Re-run jobs*) atau push lagi.
+
+Game lalu hidup di `https://<username>.github.io/ChallengingFlappyBird/`.
+Alternatif tanpa Actions: Pages → *Deploy from a branch* → `main` / `/ (root)`.
 
 ---
 

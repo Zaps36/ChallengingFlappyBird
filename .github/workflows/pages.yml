@@ -40,11 +40,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      # PENTING (sekali saja): aktifkan dulu di
+      # Settings -> Pages -> Source: "GitHub Actions".
+      # GITHUB_TOKEN tidak punya izin membuat situs Pages sendiri, jadi job ini
+      # akan gagal sampai langkah manual di atas dilakukan.
       - uses: actions/configure-pages@v5
-        # coba aktifkan Pages otomatis; kalau token tidak punya izin,
-        # aktifkan manual sekali di Settings -> Pages -> Source: GitHub Actions
-        with:
-          enablement: true
       - name: Upload artifact (situs statis = root repo)
         uses: actions/upload-pages-artifact@v3
         with:
